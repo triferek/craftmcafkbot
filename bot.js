@@ -1,6 +1,5 @@
 const mineflayer = require("mineflayer");
-const { pathfinder, Movements, goals } = require("mineflayer-pathfinder");
-const { GoalBlock } = goals;
+const { pathfinder } = require("mineflayer-pathfinder");
 
 const PASSWORD = "mojehaslo123";
 const BOT_NICK = "BotKaktus123";
@@ -15,7 +14,6 @@ function createBot() {
 
   bot.loadPlugin(pathfinder);
 
-  // 🔐 Rejestracja / logowanie
   bot.on("messagestr", (message) => {
     console.log("💬 Serwer:", message);
     if (message.includes("/register")) {
@@ -27,7 +25,6 @@ function createBot() {
     }
   });
 
-  // 🔁 Pojawienie się (pierwszy raz lub po przeładowaniu)
   let firstSpawn = true;
 
   bot.on("spawn", () => {
@@ -36,52 +33,41 @@ function createBot() {
     if (firstSpawn) {
       firstSpawn = false;
 
-      // Kompas w slocie 0
       setTimeout(() => {
-        bot.setQuickBarSlot(0);
-        bot.activateItem();
+        bot.setQuickBarSlot(0); // Wybierz kompas
+        bot.activateItem(); // Kliknij PPM
         console.log("🧭 Kliknięto kompas");
       }, 5000);
-    } else {
-      // SkyBlock: /is i idź na golemiarkę
-      setTimeout(() => {
-        bot.chat("/is");
-        console.log("📦 Wpisano /is");
-      }, 6000);
-
-      setTimeout(() => {
-        const mcData = require("minecraft-data")(bot.version);
-        const defaultMove = new Movements(bot, mcData);
-        bot.pathfinder.setMovements(defaultMove);
-
-        const goal = new GoalBlock(4317, 71, 4524);
-        bot.pathfinder.setGoal(goal);
-        console.log("🚶‍♂️ Bot idzie na golemiarkę...");
-      }, 11000);
     }
   });
 
-  // 📂 Obsługa GUI
   bot.on("windowOpen", (window) => {
     console.log("📂 Otworzono GUI:", window.title);
 
     if (window.title.includes("Menu serwerów")) {
       setTimeout(() => {
-        bot.clickWindow(15, 0, 0); // slot 15 – lava bucket
+        bot.clickWindow(15, 0, 0); // SkyBlock
         console.log("🌋 Kliknięto SkyBlock (slot 15)");
       }, 1500);
     }
 
     if (window.title.toLowerCase().includes("wyspa")) {
       setTimeout(() => {
-        bot.clickWindow(0, 0, 0); // slot 0 – teleport na wyspę
+        bot.clickWindow(0, 0, 0); // Teleport na wyspę
         console.log("🚪 Kliknięto teleport na wyspę");
       }, 1500);
     }
   });
 
   bot.on("goal_reached", () => {
-    console.log("🛑 Dotarto do golemiarki – AFK");
+    console.log("🛑 Dotarto do celu (nieużywane w tej wersji)");
+  });
+
+  bot.on("spawn", () => {
+    setTimeout(() => {
+      bot.chat("/tpa triferek");
+      console.log("📨 Wysłano /tpa triferek");
+    }, 7000); // Po około zalogowaniu na SkyBlock
   });
 
   bot.on("kicked", (reason) => {
@@ -92,13 +78,10 @@ function createBot() {
     console.log("⚠️ Błąd:", err);
   });
 
-  // 🔁 Automatyczny reconnect po rozłączeniu
   bot.on("end", () => {
-    console.log(
-      "🔄 Bot został rozłączony. Próba ponownego połączenia za 30 sek...",
-    );
+    console.log("🔄 Rozłączono. Próba ponownego połączenia za 30 sek...");
     setTimeout(() => {
-      process.exit(); // Replit automatycznie uruchomi ponownie
+      process.exit();
     }, 30000);
   });
 }
